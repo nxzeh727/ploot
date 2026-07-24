@@ -21,21 +21,18 @@ function Calendar() {
       editable={true}
       selectable={true}
       select={(info) => {
-        const title = prompt('Event title:')
-        if (title) {
+
           fetch('/events',{
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-              title:title,
+              title:"study time",
               start: info.startStr,
               end: info.endStr
             })
           }).then(res => res.json())
           .then(savedEvent => setEvents([...events,savedEvent]))
-        }
-      }
-      }
+        }}
     />
   );
 }

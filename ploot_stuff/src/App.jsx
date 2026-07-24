@@ -4,9 +4,10 @@ import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 import './App.css'
 import Calendar from './calendar'
+import Todo from './todo'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [page, setPage] = useState('calendar')
   const [currentTime, setCurrentTime] = useState(0);
 
   useEffect(() => {
@@ -17,8 +18,25 @@ function App() {
 
   return (
     <>
-
-      <Calendar />
+      {page === 'calendar' && 
+        (<>
+          <h1>Ploot</h1>
+          <p>when are you able to study?</p>
+          <Calendar />
+          <br></br>
+          <button onClick={() => setPage('todo')}>next</button>
+          <br></br>
+        </>)
+      }
+      {page === 'todo' && 
+        (<>
+          <h1>Ploot</h1>
+          <p>what do you need to do today?</p>
+          <Todo />
+          
+          <button onClick={() => setPage('calendar')}>back</button>
+        </>)
+      }
 
       
     </>
