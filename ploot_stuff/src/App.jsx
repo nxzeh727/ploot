@@ -11,7 +11,7 @@ function App() {
   const [currentTime, setCurrentTime] = useState(0);
 
   useEffect(() => {
-    fetch('/time').then(res => res.json()).then(data => {
+    fetch(`${import.meta.env.VITE_API_URL}/time`).then(res => res.json()).then(data => {
       setCurrentTime(data.time);
     });
   }, []);

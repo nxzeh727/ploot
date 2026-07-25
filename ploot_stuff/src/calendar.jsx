@@ -9,7 +9,7 @@ function Calendar() {
   const [events, setEvents] = useState([])
   
   useEffect(() => {
-    fetch('/events')
+    fetch(`${import.meta.env.VITE_API_URL}/events`)
       .then(res => res.json())
       .then(data => setEvents(data))
   },[])
