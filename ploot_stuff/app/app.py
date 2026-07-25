@@ -4,10 +4,11 @@ import os
 from dotenv import load_dotenv
 import requests
 import json
-
+from flask_cors import CORS
 
 load_dotenv()
 app = Flask(__name__)
+CORS(app)
 OPENROUTER_API_KEY = os.getenv('OPEN_ROUTER_API_KEY')
 
 eventss = [
@@ -64,5 +65,8 @@ def add_notes():
         ]
     })
     )
-    print(response.json()['choices'][0]['message']['content'])
+    
     return {'schedule': response.json()['choices'][0]['message']['content']}
+
+if __name__ == '__main__':
+    app.run(debug=False)
