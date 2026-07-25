@@ -21,8 +21,12 @@ function Todo() {
         .then(
             
             data =>{
-                let cleaned = data.schedule.trim()
-                cleaned = cleaned.replace(/^```json\n?/, '').replace(/```$/,'')
+                console.log('full response object:',data)
+                const raw = data.schedule 
+                const start = raw.indexOf('[')
+                const end = raw.lastIndexOf(']')
+
+                const cleaned = raw.slice(start, end + 1)
                 const parsed = JSON.parse(cleaned)
                 const eventsCalendar = parsed.map(item => ({
                     title: item.title,
