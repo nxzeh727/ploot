@@ -22,7 +22,7 @@ function Calendar() {
       selectable={true}
       select={(info) => {
 
-          fetch('/events',{
+          fetch(`${import.meta.env.VITE_API_URL}/events`,{
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
