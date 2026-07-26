@@ -5,7 +5,7 @@ import heroImg from './assets/hero.png'
 import './App.css'
 import Calendar from './calendar'
 import Todo from './todo'
-import Auth from './auth'
+
 
 function App() {
   const [page, setPage] = useState('calendar')
