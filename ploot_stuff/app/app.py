@@ -11,13 +11,10 @@ app = Flask(__name__)
 CORS(app)
 OPENROUTER_API_KEY = os.getenv('OPEN_ROUTER_API_KEY')
 
-eventss = [
-]
+eventss = []
 notes = []
 
-@app.route('/time')
-def index():
-    return {'time': time.time()}
+
 
 @app.route('/events',methods=['GET'])
 def get_events():
@@ -29,6 +26,10 @@ def add_event():
     event['id'] = len(eventss) + 1
     eventss.append(event)
     return event
+
+@app.route('/events', methods=['DELETE'])
+def clear_events():
+    eventss.clear()
 
 @app.route('/todo', methods=['POST'])
 def add_notes():

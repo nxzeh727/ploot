@@ -9,9 +9,11 @@ function Todo() {
     const [page, setPage] = useState('todo')
     const [notes, setNotes] = useState('')
     const [schedule, setSchedule] = useState('')
+    const [loading,setLoading] = useState(false)
   
 
     const saveNotes = () => {
+        setLoading(true) 
         fetch(`${import.meta.env.VITE_API_URL}/todo`,{
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -39,6 +41,7 @@ function Todo() {
                 setSchedule(eventsCalendar)
             setPage('schedule')}
         ).catch(err => console.error('scammed again - ',err))
+        .finally(() => setLoading(false))
     }
 
 
@@ -53,7 +56,7 @@ function Todo() {
                 columns={60}
                 placeholder='write your todolist/plans for today' >
             </textarea>
-            <button onClick={saveNotes}>save</button>
+            <button onClick={saveNotes} disabled={loading}>{loading ? "generating schedule": "save"}</button>
         </div></>)}
         {page === 'schedule' && 
             (<><div>

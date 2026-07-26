@@ -7,6 +7,7 @@ import { sortEventSegs } from '@fullcalendar/core/internal'
 
 function Calendar() {
   const [events, setEvents] = useState([])
+  const [loading,setLoading] = useState(false)
   
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/events`)
@@ -14,26 +15,32 @@ function Calendar() {
       .then(data => setEvents(data))
   },[])
   return (
-    <FullCalendar
-      plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-      initialView="timeGridDay"
-      events={events}
-      editable={true}
-      selectable={true}
-      select={(info) => {
+    <>
+      <FullCalendar
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+        initialView="timeGridDay"
+        events={events}
+        editable={true}
+        selectable={true}
+        select={(info) => {
 
-          fetch(`${import.meta.env.VITE_API_URL}/events`,{
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-              title:"study time",
-              start: info.startStr,
-              end: info.endStr
-            })
-          }).then(res => res.json())
-          .then(savedEvent => setEvents([...events,savedEvent]))
-        }}
-    />
+            fetch(`${import.meta.env.VITE_API_URL}/events`,{
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                title:"study time",
+                start: info.startStr,
+                end: info.endStr
+              })
+            }).then(res => res.json())
+            .then(savedEvent => setEvents([...events,savedEvent]))
+          }}
+      />
+      <button onClick={() => {
+        fetch(`${import.meta.env.VITE_API_URL}/events`, { method: 'DELETE' })
+          .then(() => setEvents([]))
+      }}>Clear All Events</button>
+    </>
   );
 }
 

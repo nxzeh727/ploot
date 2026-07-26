@@ -5,19 +5,21 @@ import heroImg from './assets/hero.png'
 import './App.css'
 import Calendar from './calendar'
 import Todo from './todo'
+import Auth from './auth'
 
 function App() {
   const [page, setPage] = useState('calendar')
-  const [currentTime, setCurrentTime] = useState(0);
-
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/time`).then(res => res.json()).then(data => {
-      setCurrentTime(data.time);
-    });
-  }, []);
+  const [loading,setLoading] = useState(false)
 
   return (
     <>
+      {page === 'start' && 
+        (<>
+          <h1>Ploot</h1>
+          <Auth />
+          <button onClick={() => setPage('calendar')}>next :D</button>
+        </>)
+      }
       {page === 'calendar' && 
         (<>
           <h1>Ploot</h1>
