@@ -15,7 +15,6 @@ eventss = []
 notes = []
 
 
-
 @app.route('/events',methods=['GET'])
 def get_events():
     return eventss
@@ -27,9 +26,11 @@ def add_event():
     eventss.append(event)
     return event
 
-@app.route('/events', methods=['DELETE'])
-def clear_events():
-    eventss.clear()
+@app.route('/events/<int:event>', methods=['DELETE'])
+def clear_events(event):
+    global eventss
+    eventss = [e for e in eventss if e['id'] != event]
+    return eventss
 
 @app.route('/todo', methods=['POST'])
 def add_notes():

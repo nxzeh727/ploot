@@ -22,6 +22,7 @@ function Calendar() {
         events={events}
         editable={true}
         selectable={true}
+        
         select={(info) => {
 
             fetch(`${import.meta.env.VITE_API_URL}/events`,{
@@ -35,11 +36,22 @@ function Calendar() {
             }).then(res => res.json())
             .then(savedEvent => setEvents([...events,savedEvent]))
           }}
+        eventDidMount={(info) => {
+          info.el.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+            fetch(`${import.meta.env.VITE_API_URL}/events/${info.event.id}`,{
+              method: 'DELETE',
+            })
+            .then(() => {
+
+              setEvents(prev => prev.filter(ev => ev.id !== Number(info.event.id)))
+            })
+          })
+        }
+      }
+
       />
-      <button onClick={() => {
-        fetch(`${import.meta.env.VITE_API_URL}/events`, { method: 'DELETE' })
-          .then(() => setEvents([]))
-      }}>Clear All Events</button>
+      
     </>
   );
 }

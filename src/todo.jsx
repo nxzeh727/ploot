@@ -43,8 +43,7 @@ function Todo() {
         ).catch(err => console.error('scammed again - ',err))
         .finally(() => setLoading(false))
     }
-
-
+    
   return (
     <>
         {page === 'todo' && 
