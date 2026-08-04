@@ -4,16 +4,28 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import { sortEventSegs } from '@fullcalendar/core/internal'
+import { supabase } from './supabaseClient'
 
 function Calendar() {
   const [events, setEvents] = useState([])
   const [loading,setLoading] = useState(false)
   
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/events`)
-      .then(res => res.json())
-      .then(data => setEvents(data))
+    const loadEvents = async() => {
+      const { data: { session }} = await supabase.auth.getSession()
+      console.log(session)
+      console.log(session?.access_token)
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/events`,{
+        headers: {
+          'Authorization' : `Bearer ${session.access_token}`
+        }
+      })
+      const data = await res.json()
+      setEvents(data)
+    }
+    loadEvents()
   },[])
+
   return (
     <>
       <FullCalendar
@@ -23,32 +35,37 @@ function Calendar() {
         editable={true}
         selectable={true}
         
-        select={(info) => {
-
-            fetch(`${import.meta.env.VITE_API_URL}/events`,{
+        select={ async (info) => {
+            const { data: { session }} = await supabase.auth.getSession()
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/events`,{
               method: 'POST',
-              headers: {'Content-Type': 'application/json'},
+              headers: {'Content-Type': 'application/json',
+                'Authorization':`Bearer ${session.access_token}`
+              },
               body: JSON.stringify({
                 title:"study time",
                 start: info.startStr,
                 end: info.endStr
               })
-            }).then(res => res.json())
-            .then(savedEvent => setEvents([...events,savedEvent]))
+            })
+            const savedEvent = await res.json()
+            setEvents([...events,savedEvent])
           }}
         eventDidMount={(info) => {
-          info.el.addEventListener('contextmenu', function (e) {
+          info.el.addEventListener('contextmenu', async function (e) {
             e.preventDefault();
-            fetch(`${import.meta.env.VITE_API_URL}/events/${info.event.id}`,{
+            const { data: { session }} = await supabase.auth.getSession()
+            await fetch(`${import.meta.env.VITE_API_URL}/events/${info.event.id}`,{
               method: 'DELETE',
+              headers: {
+                'Authorization':`Bearer ${session.access_token}`
+              }
             })
-            .then(() => {
-
-              setEvents(prev => prev.filter(ev => ev.id !== Number(info.event.id)))
+            setEvents(prev => prev.filter(ev => ev.id !== Number(info.event.id)))
             })
-          })
+          }
         }
-      }
+      
 
       />
       

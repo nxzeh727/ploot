@@ -182,3 +182,53 @@
     border-right-color: var(--border);
   }
 }
+
+.cheese {
+  margin: 50px;
+
+
+}
+
+.toolbar {
+  display: flex;
+  padding: 10px;
+
+}
+
+.toolbar button {
+  padding: 6px;
+  margin: 20px;
+  border: 1px solid;
+  border-radius: 2px;
+
+  cursor: pointer;
+}
+
+.potato {
+  margin: 10px;
+  padding: 16px;
+  text-align: left;
+  border: 1px solid;
+  border-radius: 2px;
+}
+
+.potato ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.potato ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.potato ul[data-type="taskList"] li > label {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.potato ul[data-type="taskList"] li[data-checked="true"] > div {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
