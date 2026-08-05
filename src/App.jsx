@@ -7,10 +7,12 @@ import Auth from './auth'
 
 
 function App() {
-  const [page, setPage] = useState('calendar')
+  const [page, setPage] = useState('landing')
   const [loading,setLoading] = useState(false)
   const [claims,setClaims] = useState(null)
   const [checkingSession, setCheckingSession] = useState(true)
+
+  
 
   useEffect(()=> {
     const loadClaims= async() => {
@@ -25,12 +27,29 @@ function App() {
     }
     loadClaims()
     
-    const {data:{subscription}} = supabase.auth.onAuthStateChange(async() => {
-      const { data } = await supabase.auth.getClaims()
-      setClaims(data?.claims ?? null)
+const { data: { subscription } } = supabase.auth.onAuthStateChange((event,session) => {
+      supabase.auth.getClaims().then(({ data }) => {
+        const newClaims = data?.claims ?? null
+        setClaims(newClaims)
+        if (newClaims && (page !== 'landing' || event === 'SIGNED_IN')) setPage('calendar')
+      })
     })
-    return () => subscription.unsubscribe()
-  },[])
+
+    return () => subscription.unsubscribe() 
+  }, [])
+
+  if (page === 'landing'){
+        return (<>
+          <h1>Ploot</h1>
+          <p>a planner that schedules your work so that you don't need to decide</p>
+          <br></br>
+          <button onClick={() => setPage(claims ? 'calendar' : 'auth')}>get started</button>
+          <br></br>
+        </>)
+    }
+  if (page === 'auth' || !claims){
+        return <Auth />
+  }
 
   if (checkingSession) {
     return <p>loading...</p>
@@ -45,8 +64,10 @@ function App() {
         setClaims(null)
   }
 
+  
   return (
     <>
+      
       
       {page === 'calendar' && 
         (<>
