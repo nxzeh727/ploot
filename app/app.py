@@ -1,4 +1,4 @@
-import time
+
 from flask import Flask, request, jsonify
 import os
 from dotenv import load_dotenv
@@ -8,18 +8,42 @@ from flask_cors import CORS
 import jwt
 from jwt import PyJWKClient
 from functools import wraps
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+from sqlalchemy import Integer, String, ForeignKey
+from flask_migrate import Migrate
+
 
 load_dotenv()
 app = Flask(__name__)
 CORS(app)
+db_url = os.environ.get("DATABASE_URL", "sqlite:///project.db")
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://","postgresql://",1)
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 OPENROUTER_API_KEY = os.getenv('OPEN_ROUTER_API_KEY')
 SUPABASE_URL = os.getenv('VITE_SUPABASE_URL')
 JWKS_URL = f"{SUPABASE_URL}/auth/v1/.well-known/jwks.json"
-print(JWKS_URL)
+
 jwks_client = PyJWKClient(JWKS_URL)
 
-eventss = []
-notes = []
+class Plans(db.Model):
+
+    id = db.Column(db.Integer,primary_key=True)
+    user_id = db.Column(db.String, nullable=False)
+    title = db.Column(db.String, nullable=False)
+    start = db.Column(db.DateTime, nullable=False)
+    end = db.Column(db.DateTime, nullable=False)
+
+class Notes(db.Model):
+
+    id = db.Column(db.Integer,primary_key=True)
+    user_id = db.Column(db.String, nullable=False)
+    content = db.Column(db.String, nullable=False)
+    time_created = db.Column(db.DateTime, nullable=False)
+    
 
 def require_auth(f):
     @wraps(f)
@@ -50,34 +74,48 @@ def require_auth(f):
 @app.route('/events',methods=['GET'])
 @require_auth
 def get_events():
-    userevnts = [e for e in eventss if e.get('user_id') == request.user_id]
-    return userevnts
+    userevnts = Plans.query.filter_by(user_id = request.user_id).all()
+    return [{'id': e.id, 'title': e.title, 'start': e.start.isoformat(), 'end': e.end.isoformat()} for e in userevnts]
 
 @app.route('/events', methods=['POST'])
 @require_auth
 def add_event():
     event = request.get_json()
-    event['id'] = len(eventss) + 1
-    event['user_id'] = request.user_id
-    eventss.append(event)
-    return event
+    potato = Plans(user_id =request.user_id,title=event['title'],
+                   start=datetime.fromisoformat(event['start']), 
+                   end = datetime.fromisoformat(event['end']) )
+    db.session.add(potato)
+    db.session.commit()
+    return {
+    'id': potato.id,
+    'title': potato.title,
+    'start': potato.start.isoformat(),
+    'end': potato.end.isoformat()
+}
 
 @app.route('/events/<int:event>', methods=['DELETE'])
 @require_auth
 def clear_events(event):
-    global eventss
-    eventss = [e for e in eventss if e['id'] != event]
-    return eventss
+    curry = Plans.query.filter_by(id=event, user_id=request.user_id).first()
+    if not curry:
+        return jsonify({'error':'not found'},404)
+    db.session.delete(curry)
+    db.session.commit()
+    return {'status':'deleted'}
 
 @app.route('/todo', methods=['POST'])
 @require_auth
 def add_notes():
     note = request.get_json()
-    notes.append(note)
     tasks = note.get('notes')
+    cheese = Notes(user_id=request.user_id, content=tasks, time_created = datetime.now())
+    db.session.add(cheese)
+    db.session.commit()
+    userevnts = Plans.query.filter_by(user_id = request.user_id).all()
+    potat =  [{'id': e.id, 'title': e.title, 'start': e.start.isoformat(), 'end': e.end.isoformat()} for e in userevnts]
     prompt = f"""this is what i am supposed to do today: {tasks}
                  please create a detailed schedule for today with exact start
-                 and end times strictly within these time periods: {eventss}
+                 and end times strictly within these time periods: {potat}
                  please dont schedule anything outside of those time periods: no breaks, no rest, nothing.
                 please also keep in mind: 
                  - realistic time estimatses for tasks
@@ -107,6 +145,7 @@ def add_notes():
     )
     
     return {'schedule': response.json()['choices'][0]['message']['content']}
+
 
 if __name__ == '__main__':
     app.run(debug=False)
