@@ -12,7 +12,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from sqlalchemy import Integer, String, ForeignKey
 from flask_migrate import Migrate
-
+from sqlalchemy.pool import NullPool
 
 load_dotenv()
 app = Flask(__name__)
@@ -21,7 +21,7 @@ db_url = os.environ.get("DATABASE_URL", "sqlite:///project.db")
 if db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://","postgresql://",1)
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
-db = SQLAlchemy(app)
+db = SQLAlchemy(app, engine_options={"poolclass": NullPool})
 migrate = Migrate(app, db)
 OPENROUTER_API_KEY = os.getenv('OPEN_ROUTER_API_KEY')
 SUPABASE_URL = os.getenv('VITE_SUPABASE_URL')
