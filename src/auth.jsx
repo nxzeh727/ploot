@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabaseClient'
 
 
-function Auth() {
+function Auth({ onLoginSuccess }) {
     const [loading, setLoading]=useState(false)
     const [email, setEmail]=useState('')
     const [claims,setClaims]=useState(null)
@@ -32,6 +32,7 @@ function Auth() {
                     else {
                         setAuthSucess(true)
                         window.history.replaceState({}, document.title,'/')
+                        onLoginSuccess?.()
                     }
                     setVerifying(false)
                 })

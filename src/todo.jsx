@@ -10,7 +10,7 @@ import TaskItem from '@tiptap/extension-task-item'
 import StarterKit from '@tiptap/starter-kit'
 import { supabase } from './supabaseClient'
 
-function Todo() {
+function Todo({ savedNotes, onNotesChange }) {
     const [page, setPage] = useState('todo')
     const [notes, setNotes] = useState('')
     const [schedule, setSchedule] = useState('')
@@ -18,7 +18,10 @@ function Todo() {
   
     const editor = useEditor({
             extensions: [StarterKit, TaskList, TaskItem.configure({nested:true,})],
-            content: '<p>what do you need to do today?</p>'
+            content: savedNotes || 'what do you need to do today :D',
+            onUpdate: ({ editor }) => {
+                onNotesChange(editor.getHTML())
+            }
         })
     const acceptCalendar = () => {
         const lines = [
@@ -86,6 +89,9 @@ function Todo() {
         } catch (err){console.error('scammed again - ',err)} 
         finally {setLoading(false)}
     }
+    
+
+
     
   return (
     <>

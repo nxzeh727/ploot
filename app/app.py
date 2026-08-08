@@ -34,8 +34,8 @@ class Plans(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     user_id = db.Column(db.String, nullable=False)
     title = db.Column(db.String, nullable=False)
-    start = db.Column(db.DateTime, nullable=False)
-    end = db.Column(db.DateTime, nullable=False)
+    start = db.Column(db.String, nullable=False)
+    end = db.Column(db.String, nullable=False)
 
 class Notes(db.Model):
 
@@ -75,22 +75,22 @@ def require_auth(f):
 @require_auth
 def get_events():
     userevnts = Plans.query.filter_by(user_id = request.user_id).all()
-    return [{'id': e.id, 'title': e.title, 'start': e.start.isoformat(), 'end': e.end.isoformat()} for e in userevnts]
+    return [{'id': e.id, 'title': e.title, 'start': e.start, 'end': e.end} for e in userevnts]
 
 @app.route('/events', methods=['POST'])
 @require_auth
 def add_event():
     event = request.get_json()
     potato = Plans(user_id =request.user_id,title=event['title'],
-                   start=datetime.fromisoformat(event['start']), 
-                   end = datetime.fromisoformat(event['end']) )
+                   start=(event['start']), 
+                   end = (event['end']) )
     db.session.add(potato)
     db.session.commit()
     return {
     'id': potato.id,
     'title': potato.title,
-    'start': potato.start.isoformat(),
-    'end': potato.end.isoformat()
+    'start': potato.start,
+    'end': potato.end
 }
 
 @app.route('/events/<int:event>', methods=['DELETE'])
@@ -112,10 +112,11 @@ def add_notes():
     db.session.add(cheese)
     db.session.commit()
     userevnts = Plans.query.filter_by(user_id = request.user_id).all()
-    potat =  [{'id': e.id, 'title': e.title, 'start': e.start.isoformat(), 'end': e.end.isoformat()} for e in userevnts]
+    potat =  [{'id': e.id, 'title': e.title, 'start': e.start, 'end': e.end} for e in userevnts]
     prompt = f"""this is what i am supposed to do today: {tasks}
                  please create a detailed schedule for today with exact start
-                 and end times strictly within these time periods: {potat}
+                 and end 
+                 times strictly within these time periods: {potat}
                  please dont schedule anything outside of those time periods: no breaks, no rest, nothing.
                 please also keep in mind: 
                  - realistic time estimatses for tasks
@@ -143,6 +144,8 @@ def add_notes():
         ]
     })
     )
+    if 'choices' not in response.json():
+        return {'error':'sorry the ai is being kinda scammy today :('}, 502
     
     return {'schedule': response.json()['choices'][0]['message']['content']}
 
