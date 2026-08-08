@@ -107,15 +107,7 @@ function Auth({ onLoginSuccess }) {
         )
     }
 
-    if (claims) {
-        return (
-            <div>
-                <h1>hi :D</h1>
-                <p> you are logged in as {claims.email}</p>
-                <button onClick={handleLogout}>Sign out</button>
-            </div>
-        )
-    }
+
 
       return (
     <div>
