@@ -36,6 +36,7 @@ function Calendar() {
         selectable={true}
         
         select={ async (info) => {
+            console.log('DRAGGED START:', info.startStr, 'DRAGGED END:', info.endStr)
             const { data: { session }} = await supabase.auth.getSession()
             const res = await fetch(`${import.meta.env.VITE_API_URL}/events`,{
               method: 'POST',

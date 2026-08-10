@@ -18,7 +18,10 @@ function App() {
 
   
   const navigateTo = (newPage)  => {
-    localStorage.setItem('ploot_page',newPage)
+    if (newPage !== 'landing' && newPage !== 'auth'){
+      localStorage.setItem('ploot_page',newPage)
+    }
+    
     setPage(newPage)
   }
   useEffect(()=> {

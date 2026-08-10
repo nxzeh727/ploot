@@ -113,8 +113,9 @@ def add_notes():
     db.session.commit()
     userevnts = Plans.query.filter_by(user_id = request.user_id).all()
     potat =  [{'id': e.id, 'title': e.title, 'start': e.start, 'end': e.end} for e in userevnts]
-    prompt = f"""this is what i am supposed to do today: {tasks}
-                 please create a detailed schedule for today with exact start
+    prompt = f"""todays date is {datetime.now()}
+                this is what i am supposed to do today: {tasks}
+                 please create a detailed schedule for today(today and today ONLY) with exact start
                  and end 
                  times strictly within these time periods: {potat}
                  please dont schedule anything outside of those time periods: no breaks, no rest, nothing.

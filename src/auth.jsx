@@ -8,40 +8,23 @@ function Auth({ onLoginSuccess }) {
     const [email, setEmail]=useState('')
     const [claims,setClaims]=useState(null)
 
-    const params = new URLSearchParams(window.location.search)
-    const hasTokenHash = params.get('token_hash')
-
-    const [verifying, setVerifying] = useState(!!hasTokenHash)
     const [authError,setAuthError] = useState(null)
-    const [authSuccess,setAuthSucess] = useState(false)
 
     useEffect(()=>{
-        const params = new URLSearchParams(window.location.search)
-        const token_hash = params.get('token_hash')
-        const type = params.get('type')
+        supabase.auth.getSession().then(({ data: {session }}) => {
+            if (session) {
+                onLoginSuccess?.()
+            }
 
-        if (token_hash) {
-            supabase.auth
-            .verifyOtp({
-                token_hash,
-                type: type || 'email',})
-                .then(({error})=>{
-                    if (error) {
-                    setAuthError(error.message)
-                    }
-                    else {
-                        setAuthSucess(true)
-                        window.history.replaceState({}, document.title,'/')
-                        onLoginSuccess?.()
-                    }
-                    setVerifying(false)
-                })
-        }
-        supabase.auth.getClaims().then(({data,error}) => { setClaims(data?.claims ?? null) })
-        const {
-            data: {subscription},
-        } = supabase.auth.onAuthStateChange(()=> {
-            supabase.auth.getClaims().then(({data,error})=> { setClaims(data?.claims ?? null)})
+        })
+        const { data: {subscription}} = supabase.auth.onAuthStateChange((event, session)=> {
+            if (event === 'SIGNED_IN' && session) {
+                window.history.replaceState({}, document.title,'/')
+                onLoginSuccess?.()
+            }
+            if (event === 'SIGNED_IN' && !session) {
+                setAuthError('login failed')
+            }
         })
 
          return () => subscription.unsubscribe()
@@ -73,15 +56,7 @@ function Auth({ onLoginSuccess }) {
         setClaims(null)
     }
 
-    if (verifying) {
-        return (
-            <div>
-                <h1>auth</h1>
-                <p>confirming...</p>
-                <p>cheese..</p>
-            </div>
-        )
-    }
+
 
     if (authError) {
         return (
@@ -97,15 +72,6 @@ function Auth({ onLoginSuccess }) {
         )
     }
 
-    if (authSuccess && !claims) {
-        return (
-            <div>
-                <h1>auth</h1>
-                <p>auth successful :D</p>
-                <p>loading...</p>
-            </div>
-        )
-    }
 
 
 
