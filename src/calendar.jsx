@@ -6,6 +6,7 @@ import interactionPlugin from '@fullcalendar/interaction'
 import { sortEventSegs } from '@fullcalendar/core/internal'
 import { supabase } from './supabaseClient'
 
+
 function Calendar() {
   const [events, setEvents] = useState([])
   const [loading,setLoading] = useState(false)
@@ -34,9 +35,12 @@ function Calendar() {
         events={events}
         editable={true}
         selectable={true}
+        eventResizableFromStart={true}
         
         select={ async (info) => {
-            console.log('DRAGGED START:', info.startStr, 'DRAGGED END:', info.endStr)
+            const cheese = prompt("give this event a name :)")
+            const title = cheese || "study time"
+      
             const { data: { session }} = await supabase.auth.getSession()
             const res = await fetch(`${import.meta.env.VITE_API_URL}/events`,{
               method: 'POST',
@@ -44,7 +48,7 @@ function Calendar() {
                 'Authorization':`Bearer ${session.access_token}`
               },
               body: JSON.stringify({
-                title:"study time",
+                title:title,
                 start: info.startStr,
                 end: info.endStr
               })
@@ -52,6 +56,43 @@ function Calendar() {
             const savedEvent = await res.json()
             setEvents([...events,savedEvent])
           }}
+         
+        eventDrop={ async (info)=>{
+          const { data: { session }} = await supabase.auth.getSession()
+          const res = await fetch(`${import.meta.env.VITE_API_URL}/events/${info.event.id}`,{
+              method: 'PATCH',
+              headers: {'Content-Type': 'application/json',
+                'Authorization':`Bearer ${session.access_token}`
+              },
+              body: JSON.stringify({
+                start: info.startStr,
+                end: info.endStr
+              })
+            })
+          const updated = await res.json()
+          setEvents(prev => prev.map(e => 
+            e.id === updated.id ? updated : e
+            ))
+        }}
+            
+        eventResize={async (info)=>{
+          const { data: { session }} = await supabase.auth.getSession()
+          const res = await fetch(`${import.meta.env.VITE_API_URL}/events/${info.event.id}`,{
+              method: 'PATCH',
+              headers: {'Content-Type': 'application/json',
+                'Authorization':`Bearer ${session.access_token}`
+              },
+              body: JSON.stringify({
+                start: info.startStr,
+                end: info.endStr
+              })
+            })
+          const updated = await res.json()
+          setEvents(prev => prev.map(e => 
+            e.id === updated.id ? updated : e
+            ))
+        }}
+
         eventDidMount={(info) => {
           info.el.addEventListener('contextmenu', async function (e) {
             e.preventDefault();

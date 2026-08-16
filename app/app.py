@@ -77,6 +77,7 @@ def get_events():
     userevnts = Plans.query.filter_by(user_id = request.user_id).all()
     return [{'id': e.id, 'title': e.title, 'start': e.start, 'end': e.end} for e in userevnts]
 
+
 @app.route('/events', methods=['POST'])
 @require_auth
 def add_event():
@@ -102,6 +103,27 @@ def clear_events(event):
     db.session.delete(curry)
     db.session.commit()
     return {'status':'deleted'}
+
+@app.route('/events/<int:event>', methods=['PATCH'])
+@require_auth
+def shift_events(event):
+    plan = Plans.query.filter_by(id=event, user_id=request.user_id).first()
+    if not plan:
+        return jsonify({'error':'not found'}),404
+    data = request.get_json()
+    if 'title' in data:
+        plan.title = data['title']
+    if 'start' in data:
+        plan.start = data['start']
+    if 'end' in data:
+        plan.end= data['end']
+    db.session.commit()
+    return {
+        'id': plan.id,
+        'title': plan.title,
+        'start': plan.start,
+        'end': plan.end,
+    }
 
 @app.route('/todo', methods=['POST'])
 @require_auth

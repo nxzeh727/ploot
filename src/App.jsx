@@ -94,7 +94,7 @@ const { data: { subscription } } = supabase.auth.onAuthStateChange((event,sessio
           <h1>Ploot</h1>
           <p>when are you able to study?</p>
           <p></p>
-          <Calendar />
+          <Calendar key={claims?.sub} />
           <br></br>
           <button onClick={handleLogout} disabled={loading}>{loading ? "logging out..." : "logout"}</button>
           <button onClick={() => navigateTo('todo')}>next</button>
@@ -105,7 +105,7 @@ const { data: { subscription } } = supabase.auth.onAuthStateChange((event,sessio
         (<>
           <h1>Ploot</h1>
           <p>what do you need to do today?</p>
-          <Todo savedNotes={savedNotes} onNotesChange={setSavedNotes}/>
+          <Todo key={claims?.sub} savedNotes={savedNotes} onNotesChange={setSavedNotes}/>
           <button onClick={handleLogout} disabled={loading}>{loading ? "logging out..." : "logout"}</button>
           <button onClick={() => navigateTo('calendar')}>back</button>
         </>)
