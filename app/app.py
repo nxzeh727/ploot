@@ -133,10 +133,10 @@ def add_notes():
     cheese = Notes(user_id=request.user_id, content=tasks, time_created = datetime.now())
     db.session.add(cheese)
     db.session.commit()
-    today = datetime.now().strftime('%Y-%m-%d')
+    today = note.get('date') or datetime.now().strftime('%Y-%m-%d')
     userevnts = Plans.query.filter(Plans.user_id == request.user_id, Plans.start.like(f"{today}%")).all()
     potat =  [{'id': e.id, 'title': e.title, 'start': e.start, 'end': e.end} for e in userevnts]
-    prompt = f"""todays date is {datetime.now()}
+    prompt = f"""todays date is {today}
                 this is what i am supposed to do today: {tasks}
                  please create a detailed schedule for today(today and today ONLY) with exact start
                  and end 

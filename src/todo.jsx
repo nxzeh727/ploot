@@ -59,6 +59,7 @@ function Todo({ savedNotes, onNotesChange }) {
         if (!editor) return
         setLoading(true) 
         const notes = editor.getText()
+        const date = new Date().toLocaleDateString('en-CA')
         try {
             const { data: { session }} = await supabase.auth.getSession()
             const res = await fetch(`${import.meta.env.VITE_API_URL}/todo`,{
@@ -66,7 +67,7 @@ function Todo({ savedNotes, onNotesChange }) {
                 headers: {'Content-Type': 'application/json',
                     'Authorization': `Bearer ${session.access_token}`
                 },
-                body: JSON.stringify({notes})
+                body: JSON.stringify({notes, date})
             })
             const data = await res.json()
             console.log('full response object:',data)

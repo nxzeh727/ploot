@@ -70,7 +70,7 @@ const { data: { subscription } } = supabase.auth.onAuthStateChange((event,sessio
     }
 
   if (page === 'auth' || !claims){
-        return <Auth onLoginSuccess={() => navigateTo('calendar')}/>
+        return <Auth onLoginSuccess={() => navigateTo('dashboard')}/>
   }
 
 
@@ -88,7 +88,16 @@ const { data: { subscription } } = supabase.auth.onAuthStateChange((event,sessio
   return (
     <>
       
-      
+      {page === 'dashboard' && 
+        (<>
+          <h1>Ploot</h1>
+          
+          <br></br>
+          <button onClick={handleLogout} disabled={loading}>{loading ? "logging out..." : "logout"}</button>
+          <button onClick={() => navigateTo('calendar')}>start scheduling :)</button>
+          <br></br>
+        </>)
+      }
       {page === 'calendar' && 
         (<>
           <h1>Ploot</h1>
