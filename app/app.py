@@ -133,7 +133,8 @@ def add_notes():
     cheese = Notes(user_id=request.user_id, content=tasks, time_created = datetime.now())
     db.session.add(cheese)
     db.session.commit()
-    userevnts = Plans.query.filter_by(user_id = request.user_id).all()
+    today = datetime.now().strftime('%Y-%m-%d')
+    userevnts = Plans.query.filter(Plans.user_id == request.user_id, Plans.start.like(f"{today}%")).all()
     potat =  [{'id': e.id, 'title': e.title, 'start': e.start, 'end': e.end} for e in userevnts]
     prompt = f"""todays date is {datetime.now()}
                 this is what i am supposed to do today: {tasks}
