@@ -99,21 +99,21 @@ function Todo({ savedNotes, onNotesChange }) {
         {page === 'todo' && 
             (<><div className="cheese">
                 <div className="toolbar">
-                    <button onClick={() => editor.chain().focus().toggleTaskList().run()}
+                    <button className="btn btn-neutral text-ploot-button-text m-3" onClick={() => editor.chain().focus().toggleTaskList().run()}
                     >
                         task list :)
                     </button>
-                    <button onClick={() => editor.chain().focus().toggleBold().run()}
+                    <button className="btn btn-neutral text-ploot-button-text m-3" onClick={() => editor.chain().focus().toggleBold().run()}
                     >
                         bold :)
                     </button>
-                    <button onClick={() => editor.chain().focus().toggleBulletList().run()}
+                    <button className="btn btn-neutral text-ploot-button-text m-3" onClick={() => editor.chain().focus().toggleBulletList().run()}
                     >
                         bullet points :)
                     </button>
                 </div>
-                <EditorContent editor={editor} className="potato"/>
-                <button onClick={saveNotes} disabled={loading}>
+                <EditorContent className="textarea border-ploot-text bg-ploot-outline text-ploot--text m-3 min-w-[500px]" placeholder="bio" editor={editor}></EditorContent>
+                <button className="btn btn-neutral text-ploot-button-text m-3" onClick={saveNotes} disabled={loading}>
                 {loading ? "generating schedule" : "save"}
                 </button>
 
@@ -146,7 +146,7 @@ function Todo({ savedNotes, onNotesChange }) {
                 alert(`${info.event.title}\n\n${info.event.extendedProps.description}`)
             }}
             />
-            <button onClick={acceptCalendar} disabled={loading}> {loading ? "saving..." : "accept calendar"}</button>
+            <button className="btn btn-neutral text-ploot-button-text m-3" onClick={acceptCalendar} disabled={loading}> {loading ? "saving..." : "accept calendar"}</button>
             
 
         </div></>)}

@@ -60,13 +60,30 @@ const { data: { subscription } } = supabase.auth.onAuthStateChange((event,sessio
   }
 
   if (page === 'landing'){
-      return (<>
-        <h1>Ploot</h1>
-        <p>a planner that schedules your work so that you don't need to decide</p>
-        <br></br>
-        <button onClick={() => navigateTo(claims ? 'calendar' : 'auth')}>get started</button>
-        <br></br>
-      </>)
+      return (<div className="bg-ploot-bg min-h-screen">
+        <div className="navbar shadow-sm">
+          <h2 className="text-ploot-text
+           text-3xl font-bold
+          p-3">Ploot</h2>
+          <p className="text-ploot-text text-l p-3">Features</p>
+          <p className="text-ploot-text text-l p-3">About</p>
+          <p className="text-ploot-text text-l p-3">Contact</p>
+        </div>
+        <div className='mt-4 p-3'>
+          <h1 className="text-ploot-text
+           text-4xl font-bold
+          p-4 text-center">Time is money.</h1>
+          <p className="text-ploot-text
+          text-center
+          mt-4">a planner that schedules your work so that you don't need to decide
+          </p>
+        </div>
+        
+        <div className="flex justify-center mt-4">
+          <button className="text-center btn btn-neutral btn-sm flex flex-col items-center btn-center" onClick={() => navigateTo(claims ? 'dashboard' : 'auth')}>get started</button>
+        </div>
+        
+      </div>)
     }
 
   if (page === 'auth' || !claims){
@@ -86,42 +103,71 @@ const { data: { subscription } } = supabase.auth.onAuthStateChange((event,sessio
 
   
   return (
-    <>
+    <div className="bg-ploot-bg min-h-screen" >
+      <div className='drawer lg:drawer-open text-ploot-text'>
+
+        <input id="my-drawer-4" type="checkbox" className="drawer-toggle inline" />
+          <div className="drawer-content">
+            
+            <nav className='navbar w-full bg-ploot-bg'>
+              <label htmlFor="my-drawer-4" aria-label="open sidebar" className="btn btn-square">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                </svg>
+              </label>
+              <div className="px-4 font-3xl font-bold">ploot</div>
+            </nav>
+            <div className="p-3">
+              {page === 'dashboard' && 
+                (<>
+                  <button className='text-ploot-button-text btn btn-neutral' onClick={() => navigateTo('calendar')}>start scheduling :)</button>
+                  <br></br>
+                </>)
+              }
+              {page === 'calendar' && (
+                <>
+                  <div className="cheesee m-3">
+                    <p className='text-ploot-text text-3xl m-3 font-bold'>When are you able to study?</p>
+                    <button className='m-3 text-ploot-button-text btn btn-neutral' onClick={() => navigateTo('todo')}>next</button>
+                  </div>
+                  <Calendar key={claims?.sub} />
+                  <br></br>
+                </>)
+              }
+              {page === 'todo' && 
+                (<>
+                  <p className='text-ploot-text text-3xl m-3 font-bold'>what do you need to do today?</p>
+                  <Todo key={claims?.sub} savedNotes={savedNotes} onNotesChange={setSavedNotes}/>
+                  <button className="btn btn-neutral text-ploot-button-text m-3" onClick={() => navigateTo('calendar')}>back</button>
+                </>)
+              }
+            </div>
+          </div>
+          <div className="drawer-side is-drawer-close:overflow-visible">
+            <label htmlFor="my-drawer-4" aria-label='close sidebar' className="drawer-overlay"></label>
+            <div className="flex min-h-full flex-col items-start bg-ploot-sidebar-bg is-drawer-close:w-14 is-drawer-open:w-64">
+              <ul className='menu w-full grow'>
+                <li>
+                  <button className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="ploot">
+                    <span className='is-drawer-close:hidden'>ploot</span>
+                  </button>
+                </li>
+                <li>
+                  <button className='text-ploot-text is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:hidden' data-tip="dashbaord" onClick={() => navigateTo('dashboard')}>dashbaord</button>
+                </li>
+                <li>
+                  <button className='text-ploot-text is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:hidden' data-tip="logout" onClick={handleLogout} disabled={loading}>{loading ? "logging out..." : "logout"}</button>
+                </li>
+              </ul>
+            </div>
+          </div>
+          </div>
+      </div>
       
-      {page === 'dashboard' && 
-        (<>
-          <h1>Ploot</h1>
-          
-          <br></br>
-          <button onClick={handleLogout} disabled={loading}>{loading ? "logging out..." : "logout"}</button>
-          <button onClick={() => navigateTo('calendar')}>start scheduling :)</button>
-          <br></br>
-        </>)
-      }
-      {page === 'calendar' && 
-        (<>
-          <h1>Ploot</h1>
-          <p>when are you able to study?</p>
-          <p></p>
-          <Calendar key={claims?.sub} />
-          <br></br>
-          <button onClick={handleLogout} disabled={loading}>{loading ? "logging out..." : "logout"}</button>
-          <button onClick={() => navigateTo('todo')}>next</button>
-          <br></br>
-        </>)
-      }
-      {page === 'todo' && 
-        (<>
-          <h1>Ploot</h1>
-          <p>what do you need to do today?</p>
-          <Todo key={claims?.sub} savedNotes={savedNotes} onNotesChange={setSavedNotes}/>
-          <button onClick={handleLogout} disabled={loading}>{loading ? "logging out..." : "logout"}</button>
-          <button onClick={() => navigateTo('calendar')}>back</button>
-        </>)
-      }
+      
 
       
-    </>
+
   )
 }
 

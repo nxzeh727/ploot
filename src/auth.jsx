@@ -76,21 +76,32 @@ function Auth({ onLoginSuccess }) {
 
 
       return (
-    <div>
-      <h1>login</h1>
-      <p>Sign in via magic link with your email below</p>
-      <form onSubmit={handleLogin}>
+    <div className='bg-ploot-bg min-h-screen'>
+      <div className="navbar shadow-sm">
+        <h2 className="text-ploot-text
+           text-3xl font-bold
+          p-3">Ploot</h2>
+        <p className="text-ploot-text text-l p-3">Features</p>
+        <p className="text-ploot-text text-l p-3">About</p>
+        <p className="text-ploot-text text-l p-3">Contact</p>
+      </div>
+      <h1 className='text-ploot-text text-4xl p-4 text-center font-bold'>Signup/Login</h1>
+      <p className='text-center text-ploot-text'>Sign in via magic link with your email below</p>
+      <form onSubmit={handleLogin} className='text-ploot-text mt-2 flex justify-center'>
         <input
-          type="email"
-          placeholder="Your email"
-          value={email}
-          required={true}
-          onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            placeholder="Your email"
+            value={email}
+            required={true}
+            onChange={(e) => setEmail(e.target.value)}
+            className="input max-w-64 input-sm bg-ploot-bg m-3 items-center text-ploot-text outline-1 outline-ploot-outline"
         />
-        <button disabled={loading}>
-          {loading ? <span>Loading</span> : <span>Send magic link</span>}
+        <button disabled={loading} className='m-3 text-center btn btn-neutral btn-sm flex flex-col items-centerx'>
+            {loading ? <span>Loading</span> : <span>Send magic link</span>}
         </button>
-      </form>
+       </form>
+      
+      
     </div>
   )
 }
