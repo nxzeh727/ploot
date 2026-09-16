@@ -9,6 +9,7 @@ import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
 import StarterKit from '@tiptap/starter-kit'
 import { supabase } from './supabaseClient'
+import { EditorState } from '@tiptap/pm/state'
 
 function Todo({ savedNotes, onNotesChange }) {
     const [page, setPage] = useState('todo')
@@ -17,11 +18,16 @@ function Todo({ savedNotes, onNotesChange }) {
     const [loading,setLoading] = useState(false)
   
     const editor = useEditor({
-            extensions: [StarterKit, TaskList, TaskItem.configure({nested:true,})],
-            content: savedNotes || 'what do you need to do today :D',
+            extensions: [StarterKit],
+            content: savedNotes || '<p>what do you need to do today :D</p>',
             onUpdate: ({ editor }) => {
                 onNotesChange(editor.getHTML())
             }
+        })
+
+    const modifier = useEditor({
+            extensions: [StarterKit],
+            content: '<p>modify ur schedule :D</p>',
         })
     const acceptCalendar = () => {
         const lines = [
@@ -34,7 +40,7 @@ function Todo({ savedNotes, onNotesChange }) {
             const start = new Date(event.start).toISOString().replace(/[-:]/g,'').split('.')[0]+'Z'
             const end = new Date(event.end).toISOString().replace(/[-:]/g,'').split('.')[0]+'Z'
             const title = event.title
-            const description = event.extendedProps.description
+            const description = event.description
             lines.push(
             `BEGIN:VEVENT`,
             `DTSTART:${start}`,
@@ -90,7 +96,51 @@ function Todo({ savedNotes, onNotesChange }) {
         } catch (err){console.error('scammed again - ',err)} 
         finally {setLoading(false)}
     }
-    
+
+    const saveModifications = async () => {
+        if (!modifier) return
+        setLoading(true)
+        const notes = modifier.getText()
+        const date = new Date().toLocaleDateString('EN-CA')
+        try {
+            const { data: { session }} = await supabase.auth.getSession()
+            console.log('fethcing modificaiotns,',{ notes, schedule, date, token: session.access_token})
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/modifications`,{
+                method: 'POST',
+                headers: {'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                },
+                body: JSON.stringify({notes, schedule, date})
+            })
+            console.log('reutned stats',res)
+            const data = await res.json()
+                console.log('full response object:',data)
+                const raw = data.schedule 
+                const start = raw.indexOf('[')
+                const end = raw.lastIndexOf(']')
+                const cleaned = raw.slice(start, end + 1)
+                const parsed = JSON.parse(cleaned)
+                const eventsCalendar = parsed.map(item => ({
+                            title: item.title,
+                            start: item.start,
+                            end: item.end,
+                            extendedProps: {
+                                description: item.description,
+                            }
+                }))
+                setSchedule(eventsCalendar)
+                setPage('schedule')
+                console.log(eventsCalendar)
+                alert(`modification sucessful!`)
+        } 
+         catch (err){
+            console.error('scammed again - ',err)
+            console.log(schedule)
+            alert(`modification failed :(`)
+        } 
+        finally {setLoading(false)}
+
+    }
 
 
     
@@ -99,10 +149,7 @@ function Todo({ savedNotes, onNotesChange }) {
         {page === 'todo' && 
             (<><div className="cheese">
                 <div className="toolbar">
-                    <button className="btn btn-neutral text-ploot-button-text m-3" onClick={() => editor.chain().focus().toggleTaskList().run()}
-                    >
-                        task list :)
-                    </button>
+                    <button onClick={()=>editor.chain().focus().toggleBulletList().run()} className="btn btn-neutral">cheese</button>
                     <button className="btn btn-neutral text-ploot-button-text m-3" onClick={() => editor.chain().focus().toggleBold().run()}
                     >
                         bold :)
@@ -120,34 +167,41 @@ function Todo({ savedNotes, onNotesChange }) {
                 
             </div></>)}
         {page === 'schedule' && 
-            (<><div>
-            <FullCalendar
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-            initialView="timeGridDay"
-            events={schedule}
-            editable={true}
-            eventResizableFromStart={true} 
-            eventDrop={(info)=>{
-                setSchedule(prev => prev.map(e => 
-                    e.title === info.event.title
-                    ?  { ... e, start: info.event.startStr, end: info.event.endStr}
-                    : e
-                ))
-            }}
-            
-            eventResize={(info)=>{
-                setSchedule(prev => prev.map(e => 
-                    e.title === info.event.title
-                    ?  { ... e, start: info.event.startStr, end: info.event.endStr}
-                    : e
-                ))
-            }}
-            eventClick={(info)=>{
-                alert(`${info.event.title}\n\n${info.event.extendedProps.description}`)
-            }}
-            />
-            <button className="btn btn-neutral text-ploot-button-text m-3" onClick={acceptCalendar} disabled={loading}> {loading ? "saving..." : "accept calendar"}</button>
-            
+            (<><div className="yes">
+                <div className="calendar-section">
+                    <FullCalendar
+                        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                        initialView="timeGridDay"
+                        className="m-3"
+                        events={schedule}
+                        editable={true}
+                        eventResizableFromStart={true} 
+                        eventDrop={(info)=>{
+                            setSchedule(prev => prev.map(e => 
+                                e.title === info.event.title
+                                ?  { ... e, start: info.event.startStr, end: info.event.endStr}
+                                : e
+                            ))
+                        }}
+                        
+                        eventResize={(info)=>{
+                            setSchedule(prev => prev.map(e => 
+                                e.title === info.event.title
+                                ?  { ... e, start: info.event.startStr, end: info.event.endStr}
+                                : e
+                            ))
+                        }}
+                        eventClick={(info)=>{
+                            alert(`${info.event.title}\n\n${info.event.extendedProps.description}`)
+                        }}
+                        />
+                        <button className="btn btn-neutral text-ploot-button-text mt-3" onClick={acceptCalendar} disabled={loading}> {loading ? "saving..." : "accept calendar"}</button>
+        
+                </div>
+                <div className="modifying-seciton">
+                    <EditorContent className="textarea border-ploot-text bg-ploot-outline text-ploot--text m-3 min-w-[500px]" editor={modifier} placeholder="what do you want to modify"></EditorContent>
+                    <button className="btn btn-neutral" onClick={saveModifications} disabled={loading} >{loading ? "fixing ur schedule.." : "save"}</button>
+                </div>
 
         </div></>)}
     </>

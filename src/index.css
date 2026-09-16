@@ -46,3 +46,19 @@ body {
   display: flex;
   justify-content: space-between
 }
+
+.yes {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch
+}
+
+.calendar-section {
+  margin: 8px;
+  flex:3
+}
+
+.modifying-seciton {
+  margin: 8px;
+  flex:1
+}

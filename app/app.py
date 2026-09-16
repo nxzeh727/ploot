@@ -13,6 +13,7 @@ from datetime import datetime
 from sqlalchemy import Integer, String, ForeignKey
 from flask_migrate import Migrate
 from sqlalchemy.pool import NullPool
+from openrouter import OpenRouter
 
 load_dotenv()
 app = Flask(__name__)
@@ -23,11 +24,15 @@ if db_url.startswith("postgres://"):
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 db = SQLAlchemy(app, engine_options={"poolclass": NullPool})
 migrate = Migrate(app, db)
-OPENROUTER_API_KEY = os.getenv('OPEN_ROUTER_API_KEY')
+OPENROUTER_API_KEY = os.getenv('HACK_CLUB_API_KEY')
 SUPABASE_URL = os.getenv('VITE_SUPABASE_URL')
 JWKS_URL = f"{SUPABASE_URL}/auth/v1/.well-known/jwks.json"
 
 jwks_client = PyJWKClient(JWKS_URL)
+client = OpenRouter(
+    api_key=OPENROUTER_API_KEY,
+    server_url="https://ai.hackclub.com/proxy/v1",
+)
 
 class Plans(db.Model):
 
@@ -87,6 +92,7 @@ def add_event():
                    end = (event['end']) )
     db.session.add(potato)
     db.session.commit()
+    print("the printing htingy acutally workds :D")
     return {
     'id': potato.id,
     'title': potato.title,
@@ -151,27 +157,52 @@ def add_notes():
                 thanks :)
                 """
 
-    response = requests.post(
-    url="https://openrouter.ai/api/v1/chat/completions",
-    headers={
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json",
-
-    },
-    data=json.dumps({
-        "model": "google/gemma-4-26b-a4b-it:free",
-        "messages": [
-        {
-            "role": "user",
-            "content": prompt
-        }
-        ]
-    })
+    response = client.chat.send(
+    model="anthropic/claude-3-haiku",
+    messages=[
+        {"role": "user", "content": prompt}
+    ],
+    stream=False,
     )
-    if 'choices' not in response.json():
+        
+    
+    data = json.loads(response.json())
+    if 'choices' not in data:
         return {'error':'sorry the ai is being kinda scammy today :('}, 502
     
-    return {'schedule': response.json()['choices'][0]['message']['content']}
+    return {'schedule': data['choices'][0]['message']['content']}
+
+@app.route('/modifications', methods=['POST'])
+@require_auth
+def modify_schedule():
+    note = request.get_json()
+    schedule = note.get('schedule')
+    modficiations = note.get('notes')
+    today = note.get('date') or datetime.now().strftime('%Y-%m-%d')
+    userevnts = Plans.query.filter(Plans.user_id == request.user_id, Plans.start.like(f"{today}%")).all()
+    potat =  [{'id': e.id, 'title': e.title, 'start': e.start, 'end': e.end} for e in userevnts]
+    prompt = f"""todays date is {today}
+                this is my schedule for today: {schedule}
+                please modify my schedule so that it accounts for these modifications: {modficiations}
+                please keep the time periods the exact same as in the scheule here: {potat}
+                 please dont schedule anything outside of those time periods: no breaks, no rest, nothing.
+                please return a json style output, with titles, descriptions, start times, and end times
+                Return ONLY a JSON array (no markdown, no explanation) where each object has EXACTLY these fields: "title" (string), "description" (string), "start" (ISO 8601 datetime string), "end" (ISO 8601 datetime string). Do not use any other field names.
+                thanks :)
+                """
+    response = client.chat.send(
+        model="anthropic/claude-3-haiku",
+        messages=[
+            {"role": "user", "content": prompt}
+        ],
+        stream=False,
+        timeout_ms=90000
+    )
+    data = json.loads(response.json())
+    if 'choices' not in data:
+        return {'error':'sorry the ai is being kinda scammy today :('}, 502
+    
+    return {'schedule': data['choices'][0]['message']['content']}
 
 
 if __name__ == '__main__':
