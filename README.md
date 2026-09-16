@@ -9,17 +9,3 @@ python backend - flask
 react frontend
 supabase login structure
 
-how to set up locally:
-download the file
-create a supabase database
-create an openrouter api key
-create a .env and put inside app
-put this inside:
-FLASK_APP=app.py
-FLASK_ENV=development
-OPEN_ROUTER_API_KEY=[put an openrouter api key]
-VITE_SUPABASE_URL=[put your supabase url here]
-VITE_SUPABASE_KEY=[put your publishable supabase key here]
-DATABASE_URL=[put your supabase url in connect here]
-Thanks for reading :D
-I hope you like it!
