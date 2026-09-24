@@ -5,8 +5,7 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import { parseDragMeta, sortEventSegs } from '@fullcalendar/core/internal'
 import { useEditor, EditorContent,useEditorState } from '@tiptap/react'
-import TaskList from '@tiptap/extension-task-list'
-import TaskItem from '@tiptap/extension-task-item'
+import { ListKit } from '@tiptap/extension-list'
 import StarterKit from '@tiptap/starter-kit'
 import { supabase } from './supabaseClient'
 import { EditorState } from '@tiptap/pm/state'
@@ -18,7 +17,10 @@ function Todo({ savedNotes, onNotesChange }) {
     const [loading,setLoading] = useState(false)
   
     const editor = useEditor({
-            extensions: [StarterKit],
+            extensions: [
+                StarterKit,
+                ListKit,
+            ],
             content: savedNotes || '<p>what do you need to do today :D</p>',
             onUpdate: ({ editor }) => {
                 onNotesChange(editor.getHTML())
@@ -149,18 +151,16 @@ function Todo({ savedNotes, onNotesChange }) {
         {page === 'todo' && 
             (<><div className="cheese">
                 <div className="toolbar">
-                    <button onClick={()=>editor.chain().focus().toggleBulletList().run()} className="btn btn-neutral">cheese</button>
+                    <button onClick={()=>editor.chain().focus().toggleTaskList().run()} className="btn btn-neutral ml-4">task list :)</button>
                     <button className="btn btn-neutral text-ploot-button-text m-3" onClick={() => editor.chain().focus().toggleBold().run()}
                     >
                         bold :)
                     </button>
-                    <button className="btn btn-neutral text-ploot-button-text m-3" onClick={() => editor.chain().focus().toggleBulletList().run()}
-                    >
-                        bullet points :)
-                    </button>
+
                 </div>
-                <EditorContent className="textarea border-ploot-text bg-ploot-outline text-ploot--text m-3 min-w-[500px]" placeholder="bio" editor={editor}></EditorContent>
+                <EditorContent className="textarea border-ploot-text bg-ploot-outline text-ploot--text m-3 min-w-[600px]" placeholder="bio" editor={editor}></EditorContent>
                 <button className="btn btn-neutral text-ploot-button-text m-3" onClick={saveNotes} disabled={loading}>
+                {loading && <span className="loading loading-spinner loading-xs"></span>}
                 {loading ? "generating schedule" : "save"}
                 </button>
 
@@ -195,12 +195,12 @@ function Todo({ savedNotes, onNotesChange }) {
                             alert(`${info.event.title}\n\n${info.event.extendedProps.description}`)
                         }}
                         />
-                        <button className="btn btn-neutral text-ploot-button-text mt-3" onClick={acceptCalendar} disabled={loading}> {loading ? "saving..." : "accept calendar"}</button>
+                        <button className="btn btn-neutral text-ploot-button-text mt-3" onClick={acceptCalendar} disabled={loading}> {loading && <span className="loading loading-spinner loading-xs"></span>}{loading ? "saving..." : "accept calendar"}</button>
         
                 </div>
                 <div className="modifying-seciton">
                     <EditorContent className="textarea border-ploot-text bg-ploot-outline text-ploot--text m-3 min-w-[500px]" editor={modifier} placeholder="what do you want to modify"></EditorContent>
-                    <button className="btn btn-neutral" onClick={saveModifications} disabled={loading} >{loading ? "fixing ur schedule.." : "save"}</button>
+                    <button className="btn btn-neutral text-ploot-buton-text" onClick={saveModifications} disabled={loading} >{loading && <span className="loading loading-spinner loading-xs"></span>}{loading ? "fixing ur schedule.." : "save"}</button>
                 </div>
 
         </div></>)}

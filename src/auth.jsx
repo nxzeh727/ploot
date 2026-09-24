@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabaseClient'
 
 
+
 function Auth({ onLoginSuccess }) {
     const [loading, setLoading]=useState(false)
     const [email, setEmail]=useState('')
@@ -81,9 +82,6 @@ function Auth({ onLoginSuccess }) {
         <h2 className="text-ploot-text
            text-3xl font-bold
           p-3">Ploot</h2>
-        <p className="text-ploot-text text-l p-3">Features</p>
-        <p className="text-ploot-text text-l p-3">About</p>
-        <p className="text-ploot-text text-l p-3">Contact</p>
       </div>
       <h1 className='text-ploot-text text-4xl p-4 text-center font-bold'>Signup/Login</h1>
       <p className='text-center text-ploot-text'>Sign in via magic link with your email below</p>

@@ -15,6 +15,8 @@ function App() {
   const [checkingSession, setCheckingSession] = useState(true)
   const [savedNotes,setSavedNotes] = useState('')
   const hasInitialized = useRef(false)
+  const [todayEvents,setTodayEvents] = useState([])
+  const [loadingEvents,setLoadingEvents] = useState(true)
 
   
   const navigateTo = (newPage)  => {
@@ -24,6 +26,26 @@ function App() {
     
     setPage(newPage)
   }
+
+  useEffect(() => {
+    const loadTodaysEvents = async() => {
+      const { data: { session }} = await supabase.auth.getSession()
+      console.log(session)
+      console.log(session?.access_token)
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/events`,{
+        headers: {
+          'Authorization' : `Bearer ${session.access_token}`
+        }
+      })
+      const data = await res.json()
+      const today = new Date().toLocaleDateString('en-CA')
+      const thingy = data.filter(e=> e.start?.startsWith(today))
+      setTodayEvents(thingy)
+      setLoadingEvents(false)
+    }
+    loadTodaysEvents()
+  },[])
+
   useEffect(()=> {
     const loadClaims= async() => {
       const {
@@ -37,7 +59,9 @@ function App() {
       hasInitialized.current=true
     }
     loadClaims()
-    
+  
+  
+
 const { data: { subscription } } = supabase.auth.onAuthStateChange((event,session) => {
   console.log('AUTH EVENT FIRED:', event, 'current page:', page)    
   if (event==='TOKEN_REFRESHED') return
@@ -65,23 +89,23 @@ const { data: { subscription } } = supabase.auth.onAuthStateChange((event,sessio
           <h2 className="text-ploot-text
            text-3xl font-bold
           p-3">Ploot</h2>
-          <p className="text-ploot-text text-l p-3">Features</p>
-          <p className="text-ploot-text text-l p-3">About</p>
-          <p className="text-ploot-text text-l p-3">Contact</p>
         </div>
-        <div className='mt-4 p-3'>
-          <h1 className="text-ploot-text
-           text-4xl font-bold
-          p-4 text-center">Time is money.</h1>
-          <p className="text-ploot-text
-          text-center
-          mt-4">a planner that schedules your work so that you don't need to decide
-          </p>
+        <div className="hero">
+          <div className='mt-4 p-3'>
+            <h1 className="text-ploot-text
+            text-4xl font-bold
+            p-4 text-center">Time is money.</h1>
+            <p className="text-ploot-text
+            text-center
+            mt-4">a planner that schedules your work so that you don't need to decide
+            </p>
+          </div>
+          
+          <div className="flex justify-center mt-4">
+            <button className="text-center btn btn-neutral btn-sm flex flex-col items-center btn-center" onClick={() => navigateTo(claims ? 'dashboard' : 'auth')}>get started</button>
+          </div>
         </div>
         
-        <div className="flex justify-center mt-4">
-          <button className="text-center btn btn-neutral btn-sm flex flex-col items-center btn-center" onClick={() => navigateTo(claims ? 'dashboard' : 'auth')}>get started</button>
-        </div>
         
       </div>)
     }
@@ -115,12 +139,18 @@ const { data: { subscription } } = supabase.auth.onAuthStateChange((event,sessio
                   <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
                 </svg>
               </label>
-              <div className="px-4 font-3xl font-bold">ploot</div>
+              <div className="px-4 font-3xl font-bold" onClick={() => navigateTo('landing')}>ploot</div>
             </nav>
             <div className="p-3">
               {page === 'dashboard' && 
                 (<>
-                  <button className='text-ploot-button-text btn btn-neutral' onClick={() => navigateTo('calendar')}>start scheduling :)</button>
+                  <h2 className="text-ploot-text font-bold">Hi, {claims?.email?.split('@')[0]} :)</h2>
+                  <p className="pb-3">Today's date is {new Date().toLocaleString('en-CA',{ weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                  <hr className="h-px my-2 border-ploot-button-text border-t-2"></hr>
+                  <p className="text-ploot-text pt-3 pb-3">you have {todayEvents.length} study block{todayEvents.length !== 1 ? 's': ''} for today</p>
+                  <button className='text-ploot-button-text btn btn-neutral mb-2' onClick={() => navigateTo('calendar')}>start scheduling :)</button>
+                  <br></br>
+                  <button className='text-ploot-button-text btn btn-neutral' onClick={() => navigateTo('todo')}>write down todays tasks :)</button>
                   <br></br>
                 </>)
               }
