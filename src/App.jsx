@@ -90,7 +90,7 @@ const { data: { subscription } } = supabase.auth.onAuthStateChange((event,sessio
            text-3xl font-bold
           p-3">Ploot</h2>
         </div>
-        <div className="hero">
+        <div className="flex flex-col items-center">
           <div className='mt-4 p-3'>
             <h1 className="text-ploot-text
             text-4xl font-bold
@@ -123,6 +123,7 @@ const { data: { subscription } } = supabase.auth.onAuthStateChange((event,sessio
         await supabase.auth.signOut()
         localStorage.removeItem('ploot_page')
         setClaims(null)
+        setPage('landing') 
   }
 
   
