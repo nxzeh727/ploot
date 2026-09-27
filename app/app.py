@@ -92,7 +92,7 @@ def add_event():
                    end = (event['end']) )
     db.session.add(potato)
     db.session.commit()
-    print("the printing htingy acutally workds :D")
+
     return {
     'id': potato.id,
     'title': potato.title,
@@ -158,7 +158,7 @@ def add_notes():
                 """
 
     response = client.chat.send(
-    model="anthropic/claude-3-haiku",
+    model="google/gemini-3.1-flash-lite-preview",
     messages=[
         {"role": "user", "content": prompt}
     ],
@@ -191,7 +191,7 @@ def modify_schedule():
                 thanks :)
                 """
     response = client.chat.send(
-        model="anthropic/claude-3-haiku",
+        model="google/gemini-3.1-flash-lite-preview",
         messages=[
             {"role": "user", "content": prompt}
         ],
