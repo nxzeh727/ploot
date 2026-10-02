@@ -27,6 +27,19 @@ function App() {
     setPage(newPage)
   }
 
+  const handleGuestMode = async() => {
+    setLoading(true)
+    const {error} = await supabase.auth.signInAnonymously()
+    if (error) {
+      console.log('error:',error)
+    } else {
+      navigateTo('dashboard')
+    }
+      setLoading(false)
+
+  }
+
+
   useEffect(() => {
     const loadTodaysEvents = async() => {
       const { data: { session }} = await supabase.auth.getSession()
@@ -103,6 +116,9 @@ const { data: { subscription } } = supabase.auth.onAuthStateChange((event,sessio
           
           <div className="flex justify-center mt-4">
             <button className="text-center btn btn-neutral btn-sm flex flex-col items-center btn-center" onClick={() => navigateTo(claims ? 'dashboard' : 'auth')}>get started</button>
+          </div>
+          <div className="flex justify-center mt-4">
+            <button className="text-center btn btn-neutral btn-sm flex flex-col items-center btn-center" onClick={handleGuestMode} disabled={loading} >guest mode :)</button>
           </div>
         </div>
         
